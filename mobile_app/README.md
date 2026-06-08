@@ -1,3 +1,8 @@
-# mobile_app
+# Flashback Stream
 
-A new Flutter project.
+Projeto Flutter + Supabase.
+
+## Executar
+
+flutter pub get
+flutter run
