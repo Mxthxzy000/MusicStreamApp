@@ -1,12 +1,22 @@
 import { useState } from "react"
 import { Link, NavLink, useNavigate } from "react-router-dom"
-import { Disc3, Heart, Home, LayoutGrid, LogOut, Menu, X } from "lucide-react"
 import { useAuth } from "../contexts/AuthContext"
+import {
+  Disc3,
+  Heart,
+  Home,
+  LayoutGrid,
+  CreditCard,
+  LogOut,
+  Menu,
+  X,
+} from "lucide-react"
 
 const navLinks = [
   { to: "/", label: "Início", icon: Home, end: true },
   { to: "/catalog", label: "Catálogo", icon: LayoutGrid },
   { to: "/favorites", label: "Favoritos", icon: Heart },
+  { to: "/plans", label: "Planos", icon: CreditCard },
 ]
 
 export function Navbar() {

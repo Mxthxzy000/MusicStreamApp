@@ -11,6 +11,34 @@ export async function fetchGenres() {
   return data
 }
 
+export async function subscribeToPlan(userId, planId) {
+  const { error } = await supabase
+    .from("user_plans")
+    .upsert({
+      user_id: userId,
+      plan_id: planId,
+    })
+
+  if (error) throw error
+}
+
+export async function fetchUserPlan(userId) {
+  const { data, error } = await supabase
+    .from("user_plans")
+    .select(`
+      *,
+      plans(*)
+    `)
+    .eq("user_id", userId)
+    .single()
+
+  if (error && error.code !== "PGRST116") {
+    throw error
+  }
+
+  return data
+}
+
 export async function fetchGenreBySlug(slug) {
   const { data, error } = await supabase.from("genres").select("*").eq("slug", slug).single()
   if (error) throw error

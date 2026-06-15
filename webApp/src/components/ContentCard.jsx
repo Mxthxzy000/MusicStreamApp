@@ -10,15 +10,22 @@ export function ContentCard({ content }) {
 
   const audioRef = useRef(null)
 
-  const handlePlay = async (e) => {
-    e.stopPropagation()
+  const handlePlay = (e) => {
+    e?.stopPropagation()
 
     if (!content.preview_url) {
-      alert("Prévia indisponível.")
+      alert("Prévia indisponível para esta faixa.")
       return
     }
 
     setShowPlayer(true)
+
+    setTimeout(() => {
+      if (audioRef.current) {
+        audioRef.current.play()
+        setIsPlaying(true)
+      }
+    }, 100)
   }
 
   const handleClose = () => {
@@ -32,38 +39,45 @@ export function ContentCard({ content }) {
     setShowPlayer(false)
   }
 
-  const togglePlayback = async () => {
+  const togglePlayback = () => {
     if (!audioRef.current) return
 
-    try {
-      if (isPlaying) {
-        audioRef.current.pause()
-        setIsPlaying(false)
-      } else {
-        await audioRef.current.play()
-        setIsPlaying(true)
-      }
-    } catch (error) {
-      console.error("Erro ao reproduzir áudio:", error)
+    if (isPlaying) {
+      audioRef.current.pause()
+      setIsPlaying(false)
+    } else {
+      audioRef.current.play()
+      setIsPlaying(true)
     }
   }
 
   useEffect(() => {
-    if (
-      showPlayer &&
-      audioRef.current &&
-      content.preview_url
-    ) {
-      audioRef.current.load()
+    const audio = audioRef.current
 
-      audioRef.current
-        .play()
-        .then(() => setIsPlaying(true))
-        .catch((err) =>
-          console.error("Erro ao iniciar áudio:", err)
-        )
+    if (!audio) return
+
+    const updateTime = () => {
+      setCurrentTime(audio.currentTime)
     }
-  }, [showPlayer, content.preview_url])
+
+    const updateDuration = () => {
+      setDuration(audio.duration || 0)
+    }
+
+    const handleEnded = () => {
+      setIsPlaying(false)
+    }
+
+    audio.addEventListener("timeupdate", updateTime)
+    audio.addEventListener("loadedmetadata", updateDuration)
+    audio.addEventListener("ended", handleEnded)
+
+    return () => {
+      audio.removeEventListener("timeupdate", updateTime)
+      audio.removeEventListener("loadedmetadata", updateDuration)
+      audio.removeEventListener("ended", handleEnded)
+    }
+  }, [showPlayer])
 
   const formatTime = (seconds) => {
     if (!seconds || Number.isNaN(seconds)) return "0:00"
@@ -71,8 +85,11 @@ export function ContentCard({ content }) {
     const mins = Math.floor(seconds / 60)
     const secs = Math.floor(seconds % 60)
 
-    return `${mins}:${String(secs).padStart(2, "0")}`
+    return `${mins}:${secs.toString().padStart(2, "0")}`
   }
+
+  const progress =
+    duration > 0 ? (currentTime / duration) * 100 : 0
 
   return (
     <>
@@ -115,6 +132,13 @@ export function ContentCard({ content }) {
             {content.synopsis}
           </p>
 
+          <button
+            onClick={handlePlay}
+            className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-primary/10 border border-primary/30 px-3 py-2 text-sm font-medium text-primary transition-all hover:bg-primary/20 hover:neon-border"
+          >
+            <Play className="h-4 w-4 fill-current" />
+            Ouvir prévia
+          </button>
         </div>
       </article>
 
@@ -133,13 +157,6 @@ export function ContentCard({ content }) {
               ref={audioRef}
               src={content.preview_url}
               preload="metadata"
-              onLoadedMetadata={(e) =>
-                setDuration(e.target.duration)
-              }
-              onTimeUpdate={(e) =>
-                setCurrentTime(e.target.currentTime)
-              }
-              onEnded={() => setIsPlaying(false)}
             />
 
             <button
@@ -165,6 +182,12 @@ export function ContentCard({ content }) {
                 <h3 className="font-display font-bold text-foreground leading-tight">
                   {content.title}
                 </h3>
+
+                {content.artist && (
+                  <p className="text-sm text-muted-foreground">
+                    {content.artist}
+                  </p>
+                )}
               </div>
             </div>
 
@@ -172,10 +195,7 @@ export function ContentCard({ content }) {
               <div
                 className="h-full rounded-full bg-primary"
                 style={{
-                  width:
-                    duration > 0
-                      ? `${(currentTime / duration) * 100}%`
-                      : "0%",
+                  width: `${progress}%`,
                 }}
               />
             </div>
@@ -189,7 +209,6 @@ export function ContentCard({ content }) {
               <button
                 onClick={togglePlayback}
                 className="flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg neon-border hover:brightness-110 transition-all active:scale-95"
-                aria-label={isPlaying ? "Pausar" : "Reproduzir"}
               >
                 {isPlaying ? (
                   <Pause className="h-6 w-6 fill-current" />
@@ -206,10 +225,40 @@ export function ContentCard({ content }) {
               </p>
             </div>
 
-            {!content.preview_url && (
-              <p className="mt-3 text-center text-sm text-red-500">
-                Esta música não possui preview_url.
-              </p>
+            {(content.spotify_url ||
+              content.deezer_url ||
+              content.album) && (
+              <div className="mt-4 space-y-3">
+                {content.album && (
+                  <p className="text-sm text-muted-foreground">
+                    <strong>Álbum:</strong> {content.album}
+                  </p>
+                )}
+
+                <div className="flex gap-2">
+                  {content.spotify_url && (
+                    <a
+                      href={content.spotify_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 rounded-xl border px-3 py-2 text-center text-sm font-medium hover:bg-muted"
+                    >
+                      Spotify
+                    </a>
+                  )}
+
+                  {content.deezer_url && (
+                    <a
+                      href={content.deezer_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 rounded-xl border px-3 py-2 text-center text-sm font-medium hover:bg-muted"
+                    >
+                      Deezer
+                    </a>
+                  )}
+                </div>
+              </div>
             )}
           </div>
         </div>

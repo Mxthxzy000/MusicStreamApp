@@ -9,6 +9,7 @@ import { GenrePage } from "../pages/GenrePage"
 import { CatalogPage } from "../pages/CatalogPage"
 import { FavoritesPage } from "../pages/FavoritesPage"
 import ResetPasswordPage from "../pages/ResetPasswordPage"
+import { PlansPage } from "../pages/PlansPage"
 
 export function AppRoutes() {
   return (
@@ -42,6 +43,15 @@ export function AppRoutes() {
       <Route
   path="/reset-password"
   element={<ResetPasswordPage />}
+/>
+
+<Route
+  path="/plans"
+  element={
+    <ProtectedRoute>
+      <PlansPage />
+    </ProtectedRoute>
+  }
 />
 
       {/* Authenticated app routes */}
