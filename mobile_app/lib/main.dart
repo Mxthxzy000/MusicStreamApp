@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+// dotenv is loaded inside SupabaseService.initialize
+import 'services/supabase_service.dart';
 import 'package:provider/provider.dart';
-import 'package:google_fonts/google_fonts.dart';
+// removed unused google_fonts import
 import 'core/themes/app_theme.dart';
 import 'providers/auth_provider.dart';
 import 'providers/favorites_provider.dart';
@@ -13,12 +13,8 @@ import 'routes/app_router.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await dotenv.load();
-
-  await Supabase.initialize(
-    url: dotenv.env['SUPABASE_URL']!,
-    anonKey: dotenv.env['SUPABASE_ANON_KEY']!,
-  );
+  // Initialize Supabase through the wrapper which validates .env
+  await SupabaseService.initialize();
 
   runApp(const FlashbackStreamApp());
 }

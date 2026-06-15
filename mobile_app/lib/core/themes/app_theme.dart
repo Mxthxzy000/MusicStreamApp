@@ -55,14 +55,7 @@ class AppTheme {
         ),
         iconTheme: const IconThemeData(color: neonPurple),
       ),
-      cardTheme: CardTheme(
-        color: cardBg,
-        elevation: 4,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        margin: const EdgeInsets.all(8),
-      ),
+      cardColor: cardBg,
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: Colors.white.withOpacity(0.05),
