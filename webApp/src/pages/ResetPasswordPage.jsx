@@ -1,12 +1,17 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { supabase } from "../services/supabaseClient"
+import { CheckCircle2, KeyRound } from "lucide-react"
 
-export default function ResetPasswordPage() {
+import { supabase } from "../services/supabaseClient"
+import { AuthLayout } from "../components/AuthLayout"
+import { FormField, inputClass, SubmitButton } from "../components/FormField"
+
+export function ResetPasswordPage() {
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [error, setError] = useState("")
   const [success, setSuccess] = useState(false)
+  const [loading, setLoading] = useState(false)
 
   const navigate = useNavigate()
 
@@ -25,53 +30,102 @@ export default function ResetPasswordPage() {
       return
     }
 
-    const { error } = await supabase.auth.updateUser({
-      password,
-    })
+    setLoading(true)
 
-    if (error) {
-      setError(error.message)
-      return
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password,
+      })
+
+      if (error) throw error
+
+      setSuccess(true)
+
+      setTimeout(() => {
+        navigate("/login")
+      }, 2500)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
     }
-
-    setSuccess(true)
-
-    setTimeout(() => {
-      navigate("/login")
-    }, 2000)
   }
 
   return (
-    <div className="mx-auto max-w-md p-6">
-      <h1 className="mb-4 text-2xl font-bold">
-        Redefinir senha
-      </h1>
-
+    <AuthLayout
+      title="Redefinir senha"
+      subtitle="Escolha uma nova senha para acessar sua conta."
+    >
       {success ? (
-        <p>Senha alterada com sucesso.</p>
+        <div className="flex flex-col items-center gap-4 py-6 text-center">
+          <span className="flex h-16 w-16 items-center justify-center rounded-full bg-secondary/15 text-secondary">
+            <CheckCircle2 className="h-8 w-8" />
+          </span>
+
+          <div>
+            <h3 className="font-display text-lg font-bold">
+              Senha alterada com sucesso
+            </h3>
+
+            <p className="mt-2 text-sm text-muted-foreground">
+              Você será redirecionado para o login em instantes.
+            </p>
+          </div>
+        </div>
       ) : (
-        <form onSubmit={handleSubmit}>
-          <input
-            type="password"
-            placeholder="Nova senha"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-col gap-4"
+        >
+          {error && (
+            <div className="rounded-xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+              {error}
+            </div>
+          )}
 
-          <input
-            type="password"
-            placeholder="Confirmar senha"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-          />
+          <FormField
+            label="Nova senha"
+            htmlFor="password"
+          >
+            <div className="relative">
+              <KeyRound className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
 
-          {error && <p>{error}</p>}
+              <input
+                id="password"
+                type="password"
+                placeholder="Digite sua nova senha"
+                className={`${inputClass} pl-10`}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
+          </FormField>
 
-          <button type="submit">
+          <FormField
+            label="Confirmar senha"
+            htmlFor="confirmPassword"
+          >
+            <div className="relative">
+              <KeyRound className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+
+              <input
+                id="confirmPassword"
+                type="password"
+                placeholder="Confirme sua nova senha"
+                className={`${inputClass} pl-10`}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+              />
+            </div>
+          </FormField>
+
+          <SubmitButton loading={loading}>
             Alterar senha
-          </button>
+          </SubmitButton>
         </form>
       )}
-    </div>
+    </AuthLayout>
   )
 }
+
+export default ResetPasswordPage
