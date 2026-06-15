@@ -8,6 +8,7 @@ import { ForgotPasswordPage } from "../pages/ForgotPasswordPage"
 import { GenrePage } from "../pages/GenrePage"
 import { CatalogPage } from "../pages/CatalogPage"
 import { FavoritesPage } from "../pages/FavoritesPage"
+import ResetPasswordPage from "../pages/ResetPasswordPage"
 
 export function AppRoutes() {
   return (
@@ -37,6 +38,11 @@ export function AppRoutes() {
           </PublicRoute>
         }
       />
+
+      <Route
+  path="/reset-password"
+  element={<ResetPasswordPage />}
+/>
 
       {/* Authenticated app routes */}
       <Route

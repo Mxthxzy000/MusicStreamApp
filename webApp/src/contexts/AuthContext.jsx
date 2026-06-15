@@ -20,10 +20,12 @@ export function AuthProvider({ children }) {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, newSession) => {
-      setSession(newSession)
-      setUser(newSession?.user ?? null)
-    })
+    } = supabase.auth.onAuthStateChange((event, newSession) => {
+  console.log("SUPABASE EVENT:", event)
+
+  setSession(newSession)
+  setUser(newSession?.user ?? null)
+})
 
     return () => {
       mounted = false
@@ -50,12 +52,13 @@ export function AuthProvider({ children }) {
     return data
   }, [])
 
-  const resetPassword = useCallback(async (email) => {
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/login`,
-    })
-    if (error) throw error
-  }, [])
+ const resetPassword = useCallback(async (email) => {
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${window.location.origin}/reset-password`,
+  })
+
+  if (error) throw error
+}, [])
 
   const signOut = useCallback(async () => {
     await supabase.auth.signOut()

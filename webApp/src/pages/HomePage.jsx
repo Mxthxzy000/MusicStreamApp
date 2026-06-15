@@ -4,6 +4,7 @@ import { useGenres } from "../hooks/useGenres"
 import { useContents } from "../hooks/useContents"
 import { GenreCard } from "../components/GenreCard"
 import { ContentCard } from "../components/ContentCard"
+
 import { Spinner } from "../components/Spinner"
 
 function Hero() {
